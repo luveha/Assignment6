@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net7.0</TargetFramework>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Compile Include="Language.fs" />
+        <Compile Include="Programs.fs" />
+        <Compile Include="Memory.fsi" />
+        <Compile Include="Memory.fs" />
+        <Compile Include="State.fsi" />
+        <Compile Include="State.fs" />
+        <Compile Include="Eval.fs" />
+        <Compile Include="Program.fs" />
+    </ItemGroup>
+
+</Project>
