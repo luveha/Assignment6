@@ -11,14 +11,19 @@ module Interpreter.State
         | c when System.Char.IsAsciiLetter(c) || c = '_' -> String.forall(fun c-> System.Char.IsAsciiLetterOrDigit(c) || c = '_') s.[1..]
         | _ -> false
 
-    type state = {m: Map<string,int>; mem: Memory.memory}
-    let mkState (memSize: int) = {m = Map.empty<string,int>; mem = Memory.empty memSize}
+    type state = {m: Map<string,int>; mem: Memory.memory; rng: System.Random}
+    let mkState (memSize: int) (ossed: int option)= 
+        match ossed with
+        | Some x -> 
+            {m = Map.empty<string,int>; mem = Memory.empty memSize; rng = System.Random(x)} 
+        | None -> 
+            {m = Map.empty<string,int>; mem = Memory.empty memSize; rng = System.Random()} 
 
     let declare x st = 
         match st.m with
         | m when m.ContainsKey x -> None
         | _ when not (validVariableName x) || reservedVariableName x -> None
-        | _ -> Some {m = st.m.Add(x,0); mem = st.mem}
+        | _ -> Some {m = st.m.Add(x,0); mem = st.mem; rng = st.rng}
 
     let getVar x st = 
         match st.m.ContainsKey x with
@@ -27,10 +32,10 @@ module Interpreter.State
 
     let setVar x v st = 
         match st.m.ContainsKey x with
-        | true -> Some {m = st.m.Add(x,v); mem = st.mem}
+        | true -> Some {m = st.m.Add(x,v); mem = st.mem; rng = st.rng}
         | _ -> None
 
-    let random _ = failwith "not implemented"
+    let random (st: state) = st.rng.Next()
     
     let push _ = failwith "not implemented"
     let pop _ = failwith "not implemented"
@@ -38,7 +43,7 @@ module Interpreter.State
     let alloc (x: string) (size: int) (st: state) = 
         match (Memory.alloc 1 st.mem) with
         | Some(mem, next) -> 
-            Some {m=st.m.Add(x,next);mem=mem}
+            Some {m=st.m.Add(x,next);mem=mem; rng=st.rng}
         | None -> None
     
     let free (ptr: int) (size: int) (st: state) = 
@@ -47,7 +52,8 @@ module Interpreter.State
                 Some (
                     {
                         m = st.m;
-                        mem = x
+                        mem = x;
+                        rng = st.rng;
                     }
                 )
             | _ -> None    
@@ -56,7 +62,8 @@ module Interpreter.State
         | Some x -> Some (
             {
                 m = st.m;
-                mem = x
+                mem = x;
+                rng = st.rng;
             }
             )
         | _ -> None
